@@ -1,0 +1,89 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+  importFileExtension = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Profile {
+  id          String        @id @default("main")
+  name        String
+  title       String
+  description String        @db.Text
+  location    String?
+
+  links       ProfileLink[]
+  skills      Skill[]
+  experiences Experience[]
+  projects    Project[]
+
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model ProfileLink {
+  id        Int     @id @default(autoincrement())
+  platform  String
+  value     String
+
+  profileId String
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, platform])
+}
+
+model Skill {
+  id        Int     @id @default(autoincrement())
+  name      String
+  category  String?
+  sortOrder Int     @default(0)
+
+  profileId String
+  profile   Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, name])
+}
+
+model Experience {
+  id           Int           @id @default(autoincrement())
+  company      String
+  position     String
+  description  String?       @db.Text
+  startDate    DateTime
+  endDate      DateTime?
+  sortOrder    Int           @default(0)
+
+  profileId    String
+  profile      Profile       @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  achievements Achievement[]
+}
+
+model Achievement {
+  id           Int        @id @default(autoincrement())
+  description  String     @db.Text
+  sortOrder    Int        @default(0)
+
+  experienceId Int
+  experience   Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+}
+
+model Project {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?  @db.Text
+  url         String?
+  isPrivate   Boolean  @default(false)
+  sortOrder   Int      @default(0)
+
+  profileId   String
+  profile     Profile  @relation(fields: [profileId], references: [id], onDelete: Cascade)
+}
