@@ -1,132 +1,207 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+﻿# Digital Business Card API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend-приложение цифровой визитки специалиста. Предоставляет GraphQL API для получения информации о профиле, профессиональных навыках, опыте работы и реализованных проектах.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Проект разработан с использованием TypeScript, Node.js, NestJS, GraphQL, Prisma ORM и PostgreSQL. Весь процесс сборки и запуска приложения, включая подготовку и заполнение базы данных, автоматизирован с помощью Docker Compose.
 
-## Description
+## Содержание
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [Архитектура](#архитектура)
+- [Структура базы данных](#структура-базы-данных)
+- [GraphQL API](#graphql-api)
+- [Запуск приложения](#запуск-приложения)
+- [Переменные окружения](#переменные-окружения)
+- [Архитектурные решения](#архитектурные-решения)
 
-## Project setup
+## Архитектура
 
-```bash
-$ npm install
+Приложение построено на основе модульной архитектуры NestJS с разделением ответственности между слоями.
+
+Основные компоненты:
+
+- **GraphQL Resolvers** — принимают GraphQL-запросы и определяют способ получения данных.
+- **Services** — содержат бизнес-логику приложения.
+- **Prisma Service** — инкапсулирует взаимодействие с базой данных.
+- **Database** — хранит профиль и связанные с ним данные.
+
+GraphQL API предоставляет доступ к вложенным сущностям профиля, позволяя получать необходимые данные одним запросом.
+
+## Структура базы данных
+
+База данных спроектирована с использованием реляционной модели.
+
+Основные сущности:
+
+- **Profile** — основная информация о специалисте.
+- **ProfileLink** — профессиональные ссылки (GitHub, LinkedIn и другие).
+- **Skill** — навыки специалиста.
+- **Experience** — опыт работы.
+- **Achievement** — достижения в рамках конкретного места работы.
+- **Project** — реализованные проекты.
+
+Связи между сущностями:
+
+- Profile → ProfileLink: один ко многим.
+- Profile → Skill: один ко многим.
+- Profile → Experience: один ко многим.
+- Experience → Achievement: один ко многим.
+- Profile → Project: один ко многим.
+
+Для связанных сущностей используются внешние ключи и каскадное удаление, обеспечивающие ссылочную целостность данных.
+
+## GraphQL API
+
+Приложение предоставляет GraphQL API по адресу:
+
+`http://localhost:3000/graphql`
+
+Для исследования API и выполнения запросов используется Apollo Sandbox.
+
+### Пример запроса
+
+```graphql
+query {
+  profile {
+    name
+    links {
+      platform
+      value
+    }
+    skills {
+      category
+      name
+    }
+    title
+    description
+    experience {
+      company
+      description
+      endDate
+      position
+      startDate
+      achievements {
+        description
+      }
+    }
+    projects {
+      description
+      isPrivate
+      name
+      url
+    }
+  }
+}
 ```
 
-## Compile and run the project
+Запрос позволяет получить профиль и связанные с ним данные в рамках одной GraphQL-операции.
+
+## Запуск приложения
+
+
+### 1. Клонирование репозитория
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone https://github.com/rewer42/test-Task-IT-SMI
+cd ./test-Task-IT-SMI/
 ```
 
-## Run tests
+### 2. Настройка переменных окружения
+
+В корне проекта создайте файл `.env`:
+
+```env
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_DB=postgres_db
+
+DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres_db
+
+APPLICATION_URL=http://localhost:3000
+ALLOWED_ORIGIN=http://localhost:3000
+```
+
+Для реального публичного развёртывания необходимо заменить стандартные учётные данные PostgreSQL на надёжные.
+
+### 3. Запуск
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+docker compose up -d --build
 ```
 
-## Deployment
+Docker Compose автоматически:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+1. Собирает Docker-образ приложения.
+2. Запускает контейнер PostgreSQL.
+3. Ожидает готовности базы данных.
+4. Запускает сервис миграций Prisma.
+5. После успешного применения миграций запускает заполнение базы данных.
+6. После успешного завершения инициализации запускает NestJS-приложение.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+Таким образом, база данных подготавливается и заполняется автоматически при запуске проекта.
+
+### 4. Проверка состояния контейнеров
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+docker compose ps
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Observability
-
-In production applications, observability is essential for understanding how your system behaves, detecting issues early, and maintaining reliable performance.
-
-[NestJS Observe](https://observe.nestjs.com) automatically instruments your NestJS application, giving you deep visibility into your system with minimal setup:
-
-- **Distributed tracing:** Follow requests across services and understand how they flow through your system.
-- **Waterfall analysis:** Visualize request execution and identify slow operations, bottlenecks, and unexpected delays.
-- **Performance analysis:** Analyze application performance in real time and quickly pinpoint areas that need optimization.
-- **Metrics:** Track key application and infrastructure metrics to understand system health and performance trends.
-- **Logging:** Centralize and correlate logs with traces and other telemetry to make debugging easier.
-- **Error tracking:** Detect errors quickly and investigate their root causes with the surrounding context.
-- **SLA monitoring:** Track service-level objectives and identify when your application is approaching or exceeding defined thresholds.
-- **Alarms and alerts:** Set up alerts for critical errors, performance degradation, SLA violations, and other anomalies so your team can react quickly.
-
-To add it to this project, run this and approve the code it prints at [observe.nestjs.com/link](https://observe.nestjs.com/link) - signing up for free if you have no account:
+Просмотр логов:
 
 ```bash
-$ npx @nestjs/observe link
+docker compose logs -f
 ```
 
-It installs `@nestjs/observe`, wires it into `AppModule` and `main.ts`, and writes the app key and secret into `.env`, which every `nest start` script (`start`, `start:dev`, `start:debug`) then loads. In production, set `OBSERVE_APP_KEY` and `OBSERVE_APP_SECRET` in the environment instead.
+### 5. Доступ к API
 
-Or do it by hand:
+После успешного запуска Apollo Sandbox доступен по адресу:
 
-```bash
-$ npm install @nestjs/observe
-```
+`http://localhost:3000/graphql`
 
-Then follow the [setup guide](https://docs.nestjs.com/observability/sdk) - it takes a single import and an app key.
+## Переменные окружения
 
-The free plan needs no payment details and covers 300,000 events a month. You can also browse the [live demo](https://www.observe-demo.nestjs.com/dashboard) first - the whole dashboard over a busy service's data, with nothing to install.
+| Переменная | Описание |
+|---|---|
+| POSTGRES_USER | Пользователь PostgreSQL |
+| POSTGRES_PASSWORD | Пароль PostgreSQL |
+| POSTGRES_DB | Имя базы данных |
+| DATABASE_URL | Строка подключения к PostgreSQL |
+| APPLICATION_URL | URL приложения |
+| ALLOWED_ORIGIN | Разрешённый CORS origin |
 
-## Resources
+## Архитектурные решения
 
-Check out a few resources that may come in handy when working with NestJS:
+### Разделение ответственности
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Auto-instrument your application with [NestJS Observe](https://observe.nestjs.com). Distributed tracing, metrics, and logging made easy. Error tracking and performance monitoring for your NestJS applications.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Приложение использует модульную архитектуру NestJS. GraphQL Resolvers отвечают за обработку запросов, Services — за бизнес-логику, а Prisma Service — за взаимодействие с базой данных.
 
-## Support
+### GraphQL и вложенные данные
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+GraphQL позволяет клиенту самостоятельно определять структуру запрашиваемых данных. Вместо нескольких отдельных HTTP-запросов клиент может получить профиль и все связанные сущности одной GraphQL-операцией.
 
-## Stay in touch
+Для загрузки вложенных достижений (Achievement) используется DataLoader, объединяющий запросы для нескольких записей опыта работы в один запрос к базе данных. Это позволяет избежать проблемы N+1. Для остальных связей дополнительная оптимизация не применяется, поскольку приложение представляет собой цифровую визитку с небольшим объёмом данных и не требует усложнения архитектуры.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Реляционная модель данных
 
-## License
+PostgreSQL используется для хранения структурированных данных со связями между сущностями. Prisma ORM обеспечивает типобезопасную работу с базой данных, управление схемой и применение миграций.
+### Автоматическая инициализация базы данных
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Для разделения этапов подготовки базы данных используются отдельные сервисы Docker Compose:
+
+- `postgres` — база данных;
+- `migrate` — применение миграций;
+- `seed` — заполнение начальными данными;
+- `app` — основное backend-приложение.
+
+Зависимости между сервисами обеспечивают последовательный запуск. Приложение запускается только после успешного завершения миграций и заполнения базы данных.
+
+### Контейнеризация
+
+Используется многоэтапная сборка Docker-образа (multi-stage build).
+
+Этап сборки отвечает за установку зависимостей, генерацию Prisma Client и компиляцию приложения.
+
+---
+
+## Автор
+
+Digital Business Card API — проект, демонстрирующий навыки разработки backend-приложений на Node.js, TypeScript и NestJS с использованием GraphQL, Prisma и Docker.
