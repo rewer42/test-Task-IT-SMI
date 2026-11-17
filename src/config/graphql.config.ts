@@ -9,6 +9,7 @@ export function getGraphQLConfig(
 ): ApolloDriverConfig {
   return {
     graphiql: false,
+    introspection: true,
     plugins: [ApolloServerPluginLandingPageLocalDefault()],
     playground: isDev(configService),
     path: configService.getOrThrow<string>('GRAPHQL_PREFIX'),
